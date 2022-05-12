@@ -24,27 +24,7 @@ public class App {
         String content = new BufferedReader(new InputStreamReader(inStreamConfig)).lines()
                 .collect(Collectors.joining("\n"));
         config = new Gson().fromJson(content, JsonObject.class);
-        // JFrame f = new JFrame();// tạo thể hiện của JFrame
-
-        // JButton b = new JButton("click");// tạo thể hiện của JButton
-        // b.setBounds(130, 50, 100, 40);// trục x , y , width, height
-
-        // f.setTitle("Hello World!");
-        // f.add(b);// thêm button vào JFrame
-
-        // f.setSize(400, 200);// thiết lập kích thước cho của sổ
-        // f.setLayout(null);// không sử dụng trình quản lý bố cục
-        // f.setVisible(true);// hiển thị cửa sổ
-        try {
-            Remote r = new Remote();
-            r.publish();
-            r.disconnect();
-        } catch (JSchException | IOException e) {
-            logger.log(Level.SEVERE, "", e);
-        } catch (InterruptedException e) {
-            logger.log(Level.SEVERE, "", e);
-            Thread.currentThread().interrupt();
-        }
+        new Desktop();
     }
 
     public static JsonObject getConfig() {
