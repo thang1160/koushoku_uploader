@@ -1,6 +1,6 @@
 {
-    "directory": "/root/koushoku/bin/386",
-    "username": "koushoku",
-    "host": "localhost",
+    "directory": "/root/koushoku/bin/386/",
+    "username": "root",
+    "host": "139.180.208.120",
     "port": 22
 }

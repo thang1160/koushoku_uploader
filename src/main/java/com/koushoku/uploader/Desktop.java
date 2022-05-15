@@ -8,7 +8,6 @@ import java.util.logging.Logger;
 import javax.swing.*;
 
 import com.jcraft.jsch.JSchException;
-import com.jcraft.jsch.SftpException;
 
 public class Desktop {
     private static final Logger logger = Logger.getLogger(Desktop.class.getName());
@@ -19,13 +18,14 @@ public class Desktop {
         f = new JFrame();
         try {
             r = new Remote();
-        } catch (JSchException e) {
+        } catch (JSchException | IOException e) {
             logger.log(Level.SEVERE, "", e);
             JOptionPane.showMessageDialog(f,
                     "Can't connect to remote server.",
                     "Warning",
                     JOptionPane.WARNING_MESSAGE);
-            r.disconnect();
+            if (r != null)
+                r.disconnect();
             System.exit(0);
             return;
         }
@@ -38,7 +38,7 @@ public class Desktop {
         });
         f.setTitle("Koushoku uploader");
         f.add(initPublishButton());
-        f.add(initBrowseButton());
+        f.add(initUploadButton());
         f.setSize(400, 200);
         f.setLayout(null);
         f.setVisible(true);
@@ -46,40 +46,67 @@ public class Desktop {
 
     public JButton initPublishButton() {
         JButton publishButton = new JButton("Publish");
-        publishButton.setBounds(130, 50, 100, 40);
+        publishButton.setBounds(250, 50, 100, 40);
         publishButton.addActionListener(arg0 -> {
             try {
                 r.publish();
-            } catch (JSchException | IOException e) {
+                JOptionPane.showMessageDialog(f,
+                        "Published successfully.",
+                        "Success",
+                        JOptionPane.INFORMATION_MESSAGE);
+            } catch (JSchException e) {
                 logger.log(Level.SEVERE, "", e);
+                JOptionPane.showMessageDialog(f,
+                        "Can't connect to remote server.",
+                        "Warning",
+                        JOptionPane.WARNING_MESSAGE);
             } catch (InterruptedException e) {
                 logger.log(Level.SEVERE, "", e);
                 Thread.currentThread().interrupt();
+            } catch (IOException e) {
+                logger.log(Level.SEVERE, "", e);
             }
         });
         return publishButton;
     }
 
-    public JButton initBrowseButton() {
-        JButton browseButton = new JButton("Browse");
-        browseButton.setBounds(258, 26, 105, 31);
-        browseButton.addActionListener(arg0 -> {
+    public JButton initUploadButton() {
+        JButton uploadButton = new JButton("Upload");
+        uploadButton.setBounds(50, 50, 100, 40);
+        uploadButton.addActionListener(arg0 -> {
             JFileChooser filedilg = new JFileChooser();
-            filedilg.showOpenDialog(filedilg);
-            File file = filedilg.getSelectedFile();
-            if (file == null)
+            Action details = filedilg.getActionMap().get("viewTypeDetails");
+            details.actionPerformed(null);
+            filedilg.setMultiSelectionEnabled(true);
+            filedilg.showOpenDialog(f);
+            File[] files = filedilg.getSelectedFiles();
+            if (files.length == 0)
                 return;
-            String path = file.getAbsolutePath();
-            JOptionPane.showMessageDialog(f,
-                    "Uploading file: " + file.getName(),
-                    "Uploading",
-                    JOptionPane.INFORMATION_MESSAGE);
             try {
-                r.upload(path, file.getName());
-            } catch (JSchException | SftpException e) {
+                int result = r.upload(files);
+                if (result < files.length) {
+                    StringBuilder sb = new StringBuilder();
+                    for (int i = result; i < files.length; i++) {
+                        sb.append(files[i].getName() + "\n");
+                    }
+                    JOptionPane.showMessageDialog(f,
+                            "List upload failed:\n" + sb.toString(),
+                            "Warning",
+                            JOptionPane.WARNING_MESSAGE);
+                } else {
+                    JOptionPane.showMessageDialog(f,
+                            files.length + " files upload successfully.",
+                            "Success",
+                            JOptionPane.INFORMATION_MESSAGE);
+                }
+            } catch (JSchException e) {
                 logger.log(Level.SEVERE, "", e);
+                JOptionPane.showMessageDialog(f,
+                        "Can't connect to remote server.",
+                        "Warning",
+                        JOptionPane.WARNING_MESSAGE);
             }
         });
-        return browseButton;
+        return uploadButton;
     }
 }

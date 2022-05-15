@@ -1,0 +1,13 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+            "label": "Compile",
+            "type": "shell",
+            "command": "mvn clean compile assembly:single",
+            "group": {
+                "kind": "build"
+            }
+		}
+	]
+}
