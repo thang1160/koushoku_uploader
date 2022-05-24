@@ -75,6 +75,20 @@ public class Remote {
         }
     }
 
+    public void restart() throws JSchException {
+        checkConnection();
+        ChannelExec channel = null;
+        try {
+            channel = (ChannelExec) session.openChannel("exec");
+            channel.setCommand("systemctl restart koushoku");
+            channel.connect();
+        } finally {
+            if (channel != null) {
+                channel.disconnect();
+            }
+        }
+    }
+
     public int upload(File[] files) throws JSchException {
         checkConnection();
         ChannelSftp channelSftp = null;
